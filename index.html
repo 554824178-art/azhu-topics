@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2A1A0E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="选题库">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
 <meta name="robots" content="noindex,nofollow,noarchive">
 <title>阿祖画室 · 选题库</title>
 <style>
@@ -13,7 +17,8 @@
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
-  font:15px/1.75 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+  font:15px/1.75 -apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-text-size-adjust:100%}
 a{color:inherit;text-decoration:none}
 .hd{position:sticky;top:0;z-index:10;background:rgba(255,255,255,.96);
   backdrop-filter:saturate(180%) blur(12px);border-bottom:1px solid var(--line);
@@ -64,6 +69,7 @@ main{padding:14px 16px calc(90px + env(safe-area-inset-bottom));max-width:720px;
 .detail .meta{color:var(--faint);font-size:12px;margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .hook{font-size:19px;font-weight:800;line-height:1.55;color:var(--ink)}
 .copy{white-space:pre-wrap;font-size:15px;line-height:1.95;color:#3A2A1A}
+.copy,.hook,.t,.linkbox{overflow-wrap:anywhere}
 .steps{margin:0;padding:0;list-style:none;counter-reset:s}
 .steps li{position:relative;padding-left:26px;margin-bottom:10px;font-size:14px;line-height:1.8;color:#3A2A1A}
 .steps li:before{counter-increment:s;content:counter(s);position:absolute;left:0;top:1px;
@@ -103,6 +109,16 @@ main{padding:14px 16px calc(90px + env(safe-area-inset-bottom));max-width:720px;
 .mine{display:flex;align-items:center;justify-content:space-between;padding:14px 2px;border-bottom:1px solid var(--line)}
 .mine .l{font-size:14px;font-weight:700}
 .mine .r{font-size:12px;color:var(--faint)}
+.actionbar{position:fixed;left:0;right:0;bottom:0;z-index:30;display:flex;gap:10px;
+  max-width:720px;margin:0 auto;padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(255,255,255,.97);border-top:1px solid var(--line);
+  backdrop-filter:saturate(180%) blur(12px)}
+.actionbar .btn{flex:1;margin-top:0;padding:12px 10px;font-size:14px}
+.actionbar .btn.ghost{background:#fff}
+main.withbar{padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+.qrimg{width:100%;max-width:260px;height:auto;display:block;margin:4px auto 14px;border-radius:8px}
+.linkbox{font:12px/1.6 ui-monospace,Menlo,monospace;background:#fff;border:1px solid var(--line);
+  border-radius:10px;padding:10px;word-break:break-all;color:var(--sub);margin-bottom:10px}
 </style>
 </head>
 <body>
@@ -124,6 +140,7 @@ const fab = document.getElementById('fab');
 const KEY = 'azhu_store_v1';
 const WK = ['10/20–10/26','10/27–11/02','11/03–11/09','11/10–11/16','11/17–11/23','11/24–11/30','12/01–12/07'];
 const STAT = {'':'未拍','done':'已拍','pub':'已发'};
+const QR_URI = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAwwAAAMMAQMAAADEsbI4AAAABlBMVEUqGg7////JYUGdAAADIklEQVR42u3dSW7cMBAFUCIX4P1vqRsoA5QWySoKzoIUjLxeBI6k1lt48V0sDuVc/TkKAoFAIBAIBAKBQCAQCAQCgUAgEN+JOMr4ua/9eaCUej3XPlx/3yj9tdJ+7deNH2X5B4FAIBCI/4dosrvP9NJeu/97fBL7b2y3oT68QHYjEAgEArE2u4+25A51d3fjTun8G7IbgUAgEIhXsnsI8Hv0/K62s8F02Y1AIBAIxGvZfX6GxrMKXN2NQCAQCMSb2Z22q2dN7+Et+t0IBAKBQOzO7jyO/+GfyZv9LhAIBAKBWJDd+QKy0na0z9DgbteIzd/id4FAIBAIxJrsHqrtdhVY9/CwRixrmKu7EQgEAoFYnd3dditDz7qdWH72FXjpp7PV/s8A2Y1AIBAIxMrsbnM6VuVhCP3oc39YNya7EQgEAoHYkN1H3ri+nsu2Zalhs9R2A1XZjUAgEAjEsuwe4rg8NMKn1Xb+AtmNQCAQCMSi7G7noNX8Wnb3Ye9U2Y1AIBAIxNrszu5mU9JKMrs8nigmuxEIBAKBWJvdMXWvTJ6uDLsez4pv/W4EAoFAIDZkd2xwZyPloVKP/W57syAQCAQCsSu7Q287K81rfsR3tjZcdiMQCAQCsSa7uxPAhrv5oZ9nfk2/G4FAIBCIXXX3daE+btASO99D5NvPHIFAIBCIXXX39LzPcJL38xox/W4EAoFAIHbV3TX8lG90PhllD5PdZDcCgUAgEGvr7jjFPNsn9Qt7s8huBAKBQCDeqLsnc8qHnA7HlVjfjUAgEAjErrr7CLVzVny3pfnkfbIbgUAgEIgNdXecIf7J7qHarqHfHc4nKcbMEQgEAoFYXXeHG8cX472ESemyG4FAIBCIDdmdN65Lcj5YN/c8f4t91RAIBAKB2JDdsYoeVoaFbVlqUrMbM0cgEAgE4qXsjhX4kNhhjrp+NwKBQCAQL9fdDweHZTu3GDNHIBAIBGJrdg/97ukhYdPzSbpTQ2U3AoFAIBBrszu7Ea7WvgIfvnEkm7bIbgQCgUAgVmT3us+BQCAQCAQCgUAgEAgEAoFAIBAIxLcgfgKVEjVjwwOCUgAAAABJRU5ErkJggg==';
 
 function emptyStore(){ return {custom:[],overrides:{},deleted:[],status:{}}; }
 function loadStore(){
@@ -174,6 +191,7 @@ function goSeason(){ state={v:'season',cat:'D',id:null,from:null,listIds:[]}; re
 function goCat(c){ state={v:'cat',cat:c,id:null,from:null,listIds:[]}; render(); window.scrollTo(0,0); }
 function goMine(){ state={v:'mine',cat:null,id:null,from:null,listIds:[]}; render(); window.scrollTo(0,0); }
 function goBackup(){ state={v:'backup',cat:null,id:null,from:null,listIds:[]}; render(); window.scrollTo(0,0); }
+function goOpen(){ state={v:'open',cat:null,id:null,from:null,listIds:[]}; render(); window.scrollTo(0,0); }
 function goItem(id, from, listIds){
   state={v:'item',cat:state.cat,id,from:from||state.v,listIds:listIds||state.listIds||[]};
   render(); window.scrollTo(0,0);
@@ -198,7 +216,8 @@ fab.onclick = ()=> goEdit(null);
 
 function render(){
   back.style.display = state.v==='home' ? 'none' : 'flex';
-  fab.style.display = state.v==='edit' ? 'none' : 'flex';
+  fab.style.display = ['home','season','cat','mine'].indexOf(state.v) >= 0 ? 'flex' : 'none';
+  view.classList.toggle('withbar', state.v==='item');
   if(state.v==='home') return renderHome();
   if(state.v==='season') return renderSeason();
   if(state.v==='cat') return renderCat();
@@ -206,6 +225,7 @@ function render(){
   if(state.v==='edit') return renderEdit();
   if(state.v==='mine') return renderMine();
   if(state.v==='backup') return renderBackup();
+  if(state.v==='open') return renderOpen();
 }
 
 function statusDot(id){
@@ -217,13 +237,13 @@ function rowsHtml(arr, opts){
   opts = opts || {};
   return arr.map(x=>{
     const s = stOf(x.id);
-    return '<div class="row" data-id="'+x.id+'"><div class="idx">'+esc(x.id)+'</div><div class="body">'
+    const idTxt = x.id && x.id.charAt(0)==='N' ? '新' : x.id;
+    return '<div class="row" data-id="'+x.id+'"><div class="idx">'+esc(idTxt)+'</div><div class="body">'
       + '<div class="t">'+esc(x.title)+'</div>'
       + '<div class="m"><span class="chip">'+esc(x.form)+'</span>'
       + (x.win?'<span class="chip season">'+esc(x.win)+'</span>':'')
       + (x.cost?'<span>'+esc(x.cost)+'</span>':'')
       + (s?'<span>'+statusDot(x.id)+esc(STAT[s])+'</span>':'')
-      + (opts.custom && x.id && x.id.charAt(0)==='N'?'<span>我加的</span>':'')
       + '</div></div></div>';
   }).join('');
 }
@@ -238,6 +258,9 @@ function bindRows(arr){
 function renderHome(){
   ttl.textContent = '阿祖画室 · 选题库';
   cnt.textContent = allItems().length + ' 条';
+  const all = allItems();
+  const doneN = all.filter(x=>stOf(x.id)==='done').length;
+  const pubN = all.filter(x=>stOf(x.id)==='pub').length;
   let h = '<div class="hero"><h1>选题库</h1><p>点分类 → 点选题 → 看文案和拍法</p></div>';
   h += '<div class="seasonbox" id="seasonbox"><div class="st">NOW · 10/20 – 11/30</div>'
      + '<div class="sn">本月可拍 '+seasonItems().length+' 条</div>'
@@ -250,13 +273,15 @@ function renderHome(){
   });
   h += '</div><div class="list" id="res" style="margin-top:18px"></div>';
   h += '<div class="list" style="margin-top:14px">'
-     + '<div class="mine" id="mine"><div class="l">我的选题与状态</div><div class="r">我加的 '+store.custom.length+' 条 ›</div></div>'
+     + '<div class="mine" id="mine"><div class="l">我的选题与状态</div><div class="r">已拍 '+doneN+' · 已发 '+pubN+' ›</div></div>'
+     + '<div class="mine" id="open"><div class="l">手机打开 / 发给同事</div><div class="r">二维码 ›</div></div>'
      + '<div class="mine" id="bk"><div class="l">备份与恢复</div><div class="r">导出 / 导入 ›</div></div>'
      + '</div>';
   h += '<div class="foot">阿祖画室 · 央美附中考前 · 燕郊</div>';
   view.innerHTML = h;
   document.getElementById('seasonbox').onclick = goSeason;
   document.getElementById('mine').onclick = goMine;
+  document.getElementById('open').onclick = goOpen;
   document.getElementById('bk').onclick = goBackup;
   view.querySelectorAll('.cat').forEach(el=> el.onclick = ()=> goCat(el.dataset.c));
   const q = document.getElementById('q');
@@ -264,7 +289,7 @@ function renderHome(){
     const k = q.value.trim();
     const res = document.getElementById('res');
     if(!k){ res.innerHTML=''; return; }
-    const hit = allItems().filter(x=> (x.title+x.hook+x.copy).indexOf(k)>=0);
+    const hit = allItems().filter(x=> (x.title+x.hook+x.copy+(x.tags||'')+(x.shoot||[]).join('')).indexOf(k)>=0);
     res.innerHTML = hit.length ? rowsHtml(hit.slice(0,60)) : '<div class="empty">没找到</div>';
     bindRows(hit.slice(0,60));
   };
@@ -297,7 +322,8 @@ function renderCat(){
       h += '<div class="sep">常青备用 · 任何时候都能拍</div>';
     }
     const s = stOf(x.id);
-    h += '<div class="row" data-id="'+x.id+'"><div class="idx">'+esc(x.id)+'</div><div class="body">'
+    const idTxt = x.id && x.id.charAt(0)==='N' ? '新' : x.id;
+    h += '<div class="row" data-id="'+x.id+'"><div class="idx">'+esc(idTxt)+'</div><div class="body">'
       + '<div class="t">'+esc(x.title)+'</div>'
       + '<div class="m"><span class="chip">'+esc(x.form)+'</span>'
       + (x.win?'<span class="chip season">'+esc(x.win)+'</span>':(x.season?'<span class="chip season">'+esc(x.season)+'</span>':''))
@@ -333,7 +359,6 @@ function renderItem(){
   if(x.hook) h += '<div class="card"><h3>封面大字</h3><div class="hook">'+esc(x.hook)+'</div></div>';
 
   h += '<div class="card"><h3>正文（可直接复制 / 可编辑）</h3><div class="copy" id="copytext">'+esc(x.copy)+'</div>'
-     + '<button class="btn" id="copybtn">复制正文</button>'
      + '<button class="btn ghost" id="copyall">复制标题 + 正文 + 标签</button></div>';
 
   if(x.shoot && x.shoot.length){
@@ -343,7 +368,6 @@ function renderItem(){
   if(x.tags) h += '<div class="card"><h3>标签</h3><div class="tags">'+esc(x.tags)+'</div></div>';
 
   h += '<div class="btnrow"><button class="btn" id="edit">编辑这条</button></div>';
-  h += '<div class="btnrow"><button class="btn ghost" id="copypub">复制发布包，标记已发</button></div>';
 
   const ids = state.listIds || [];
   const idx = ids.indexOf(x.id);
@@ -352,6 +376,8 @@ function renderItem(){
        + '<button id="next" '+(idx>=ids.length-1?'disabled':'')+'>下一条 ›</button></div>';
   }
   h += '</div>';
+  h += '<div class="actionbar"><button class="btn ghost" id="copybtn">复制正文</button>'
+     + '<button class="btn" id="copypub">复制发布包 · 已发</button></div>';
   view.innerHTML = h;
 
   view.querySelectorAll('#stat .s').forEach(el=>{
@@ -385,7 +411,7 @@ function renderItem(){
 
   const cp = document.getElementById('copypub');
   cp.onclick = async ()=>{
-    await copy(x.title+'\n\n'+x.copy+'\n\n'+(x.tags||''), cp, '复制发布包，标记已发');
+    await copy(x.title+'\n\n'+x.copy+'\n\n'+(x.tags||''), cp, '复制发布包 · 已发');
     if(!store.status[x.id]) store.status[x.id] = {};
     store.status[x.id].s = 'pub';
     store.status[x.id].t = Date.now();
@@ -564,6 +590,36 @@ function renderBackup(){
     if(!confirm('清空所有修改？新增的选题、编辑和状态都会没，内置内容恢复原样。')) return;
     store = emptyStore();
     persist(); goHome();
+  };
+}
+
+function renderOpen(){
+  ttl.textContent = '手机打开';
+  cnt.textContent = '';
+  const url = 'https://554824178-art.github.io/azhu-topics/';
+  let h = '<div class="hero"><h1>手机打开</h1><p>扫码或点链接；进度存在这台手机里</p></div>';
+  h += '<div class="card" style="text-align:center">';
+  if(QR_URI) h += '<img class="qrimg" alt="选题库二维码" src="'+QR_URI+'">';
+  h += '<div class="linkbox" id="urltxt">'+url+'</div>'
+     + '<button class="btn" id="copyurl">复制链接</button></div>';
+  h += '<div class="card"><h3>三步用起来</h3><ol class="steps">'
+     + '<li>微信扫码，或把链接发到微信里点开。</li>'
+     + '<li>浏览器右上角「…」→「添加到主屏幕」，以后像 App 一样点开。</li>'
+     + '<li>换手机前，先在「备份与恢复」里复制备份，再在新手机导入。</li>'
+     + '</ol></div>';
+  h += '<div class="card"><h3>进度存在哪</h3><div class="copy">拍摄状态、你新增和改过的选题，只保存在当前手机的浏览器里，不会上传，也不依赖电脑。'
+     + '清理浏览器数据或换手机时会丢，所以每月导出一次备份更稳妥。</div></div>';
+  view.innerHTML = h;
+  const btn = document.getElementById('copyurl');
+  btn.onclick = async ()=>{
+    try{ await navigator.clipboard.writeText(url); btn.textContent='已复制 ✓'; }
+    catch(e){
+      const t = document.getElementById('urltxt');
+      const r = document.createRange(); r.selectNodeContents(t);
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+      btn.textContent='请长按复制';
+    }
+    setTimeout(()=>{ btn.textContent='复制链接'; }, 1600);
   };
 }
 
